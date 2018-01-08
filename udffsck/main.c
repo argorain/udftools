@@ -34,10 +34,19 @@
 #include <sys/mman.h>
 #include <limits.h>
 #include <signal.h>
+#ifdef __APPLE__
+//#include <sys/ucred.h>
+#include <sys/mount.h>
+#else
 #include <mntent.h>
 #include <sys/vfs.h>
+#endif
 #include <sys/stat.h>
+#ifdef __APPLE__
+#include <sys/mount.h>
+#else
 #include <sys/vfs.h>
+#endif
 
 #include <ecma_167.h>
 #include <libudffs.h>

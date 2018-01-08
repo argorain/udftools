@@ -25,6 +25,12 @@ AC_SYS_LARGEFILE
 dnl Checks for library functions.
 AC_SUBST(LTLIBOBJS)
 
+dnl Enable Darwin extensions (AC_USE_SYSTEM_EXTENSIONS does not enable
+dnl them in 2.63)
+AC_CANONICAL_HOST
+AS_CASE([$host_os],
+       [darwin*], [CPPFLAGS="${CPPFLAGS} -D_DARWIN_C_SOURCE"])
+
 AC_CONFIG_FILES(Makefile libudffs/Makefile mkudffs/Makefile cdrwtool/Makefile pktsetup/Makefile udffsck/Makefile wrudf/Makefile doc/Makefile)
 
 AC_ARG_ENABLE(debug,
@@ -38,6 +44,7 @@ esac],
 [debug=false])
 
 AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
+AM_CONDITIONAL(HAVE_DARWIN, test "${SYS}" = "darwin")
 
 AC_ARG_ENABLE(tests,
 AS_HELP_STRING([--enable-tests],

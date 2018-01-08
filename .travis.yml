@@ -1,10 +1,5 @@
 language: c
 
-compiler:
-  - gcc
-  - clang
-    # - tcc
-
 dist:
   - trusty
     #  - precise
@@ -31,9 +26,27 @@ addons: &addons
         #      - tcc
         # - tcc:i386
 
-#matrix:
-#  include:
-#    - compiler: gcc
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      compiler: clang
+      script:
+        - if [ -n "$COVERITY_SCAN_TOKEN" ]; then exit 0; fi
+        - ./autogen.sh $TESTS
+        - ./configure $TESTS
+        - make
+        - if [ -n "$TESTS" ]; then ./udffsck/travis-tests.sh $TESTLEVEL; fi
+    - os: osx
+      compiler: clang
+      script:
+        - if [ -n "$COVERITY_SCAN_TOKEN" ]; then exit 0; fi
+        - ./autogen.sh $TESTS
+        - ./configure $TESTS
+        - cd libudffs && make
+        - cd ../udffsck && make
+  allow_failures:
+    - os: osx
 #      env:
 #        - secure: "rH+rQS0W+0U3C/W/uRqJ8E5A3KrlbWaDRpZtdT1/SO0kEMnmuG2b0UvoadcIKOEXNHnQeZ3kPQbG2Wjfo/D6up0mXGZLXAvaJZozagxdfF2QPHSpvj2NDRLM71+UaKK/ksq3auPq+o3Y74FZOc4oBr7kPpr01H0pK8/2lljxS2daINRgFfcsaRhKNshtvHBn/KLgbwa5vEB/jadKBKM+mgAYE1sFv8P3yZ3+MzxygpurJ6enU6/9JITF5QgB11ybivYCbqoEf+IhzxgsmELz0zgL+PCVzTvrrNzpCT1UZJ35vWht5Yf7/AmK3sI/rMJm7TYswFKAc7NUbn80oIw6opp7sW1oFqMEHnHNLMNSljg8BwUrbH+y6+yV7sRfG6djCTYUYGYY9ZC2Ef4r3s3ZrRwHuBujZx/DOnFj0nd0AuvETNPkMWD1996bvSQ+WkfZ4JdW335/G61GdQv7kMTutWLKrlDquqxKM1AsoP1d99vCBzpEfRKyZjDUUSmnjdvZ/QgIDidGzH3vYFO81N39HjgKZlxH+oCuoX2ak3A6BrOT7t6mgEXnGM4H9vWhoKb7hseadBsR7YnbFSRmF2FDihEoIJ/BCPykGSZWzxTF94zC3WURI1C3HL0sAHGg3M620FgFj3M4Xkf0CPsmdsjwsnZg6TgVkYwAaKKP0HI2MFs="
 #      addons:
@@ -48,6 +61,10 @@ addons: &addons
 #          branch_pattern: master
 
 before_script:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install automake libtool; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade cmake wget; fi
   - cd ..
   - mkdir cmocka
   - cd cmocka
